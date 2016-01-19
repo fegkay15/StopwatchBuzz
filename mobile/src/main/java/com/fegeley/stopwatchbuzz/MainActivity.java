@@ -1,5 +1,6 @@
 package com.fegeley.stopwatchbuzz;
 
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -9,6 +10,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.TypedValue;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,6 +19,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -55,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
     Vibrator vibe = null;
     private String overall = "00:00:00:000";
     private String lap = "00:00:00:000";
+    LinearLayout linearLayout;
 
     MediaPlayer swe;
     Boolean play = false;
@@ -76,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
         actionBar.setDisplayUseLogoEnabled(true);
         actionBar.setDisplayShowHomeEnabled(true);
 
-        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.linlay);
+        linearLayout = (LinearLayout) findViewById(R.id.linlay);
         AutoResizeTextView txt1 = new AutoResizeTextView(MainActivity.this);
         txt1.setWidth(LinearLayout.LayoutParams.WRAP_CONTENT);
         txt1.setHeight(LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -243,7 +247,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void resetPressed(View v){
         play = false;
-        t.cancel();
+        if(t != null) {
+            t.cancel();
+        }
         pauseLap = true;
         ms = 0;
         sec = 0;
@@ -354,5 +360,30 @@ public class MainActivity extends AppCompatActivity {
             count2 = 0;
             textView10.setText("00:00:00:000");
         }
+    }
+
+    public void clear(View v){
+        linearLayout.removeAllViewsInLayout();
+        AutoResizeTextView txt1 = new AutoResizeTextView(MainActivity.this);
+        txt1.setWidth(LinearLayout.LayoutParams.WRAP_CONTENT);
+        txt1.setHeight(LinearLayout.LayoutParams.WRAP_CONTENT);
+        txt1.setTypeface(Typeface.MONOSPACE);
+        txt1.setTextSize(TypedValue.COMPLEX_UNIT_SP, 500);
+        txt1.setSingleLine();
+        txt1.setText("     Overall - Lap                     ");
+        linearLayout.addView(txt1);
+    }
+
+    public void copy(View v){
+        int laps = linearLayout.getChildCount();
+        String lapData = "";
+        for(int i = 0; i < laps; i++){
+            TextView children = (TextView) linearLayout.getChildAt(i);
+            lapData = lapData + "\n" + children.getText().toString();
+        }
+        Toast.makeText(MainActivity.this, "Copied Lap Data to Clipboard",
+                Toast.LENGTH_LONG).show();
+        ((ClipboardManager) getSystemService(this.CLIPBOARD_SERVICE))
+                .setText(lapData);
     }
 }
